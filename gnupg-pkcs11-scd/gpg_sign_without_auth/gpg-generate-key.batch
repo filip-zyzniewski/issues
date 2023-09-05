@@ -1,0 +1,8 @@
+Key-Type: RSA
+%no-protection
+Key-Grip: KEYGRIP
+Expire-Date: 10y
+Name-Real: Filip Zyzniewski
+Name-Comment: testcard
+Name-Email: filip.zyzniewski@gmail.com
+%commit
