@@ -7,24 +7,12 @@ set -o pipefail
 KEY_LABEL="gpg"
 SUBJECT="CN=Filip Zyzniewski"
 TIMESTAMPER="date --iso-8601=ns"
-LOG_PREFIXER='
-  BEGIN {
-    tscmd="'"$TIMESTAMPER"'"
-  }
-  {
-    line=$0
-    tscmd | getline
-    close(tscmd)
-    print $0 " " program ": " line
-  }
-'
 
 log() {
   echo "$($TIMESTAMPER) gpg_setup_sign: $@" 1>&2
 }
 
-pcscd --foreground --debug 2>&1 |
-awk -W interactive -v program=pcscd "$LOG_PREFIXER" &
+pcscd --foreground --debug &
 
 log "waiting for the card to be available"
 
@@ -88,10 +76,18 @@ pkcs11-tool \
   --label "$KEY_LABEL"
 
 mkfifo /tmp/gnupg-pkcs11-scd.log
-awk -W interactive -v program= "$LOG_PREFIXER" /tmp/gnupg-pkcs11-scd.log &
+(
+  while true
+  do cat /tmp/gnupg-pkcs11-scd.log
+  done
+) &
 
 mkfifo /tmp/gpg-agent.log
-awk -W interactive -v program= "$LOG_PREFIXER" /tmp/gpg-agent.log &
+(
+  while true
+  do cat  /tmp/gpg-agent.log
+  done
+) &
 
 log "looking up the key grip"
 KEYGRIP="$(
